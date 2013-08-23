@@ -173,29 +173,44 @@ describe('cli', function () {
         vmName,
         communityImageId,
         process.env.AZURE_VM_TEST_LOCATION || 'West US',
-        function (result) {
+        verifyCreation(vmName, result)
+      );
+    });
 
-        result.exitStatus.should.equal(0);
+    it('should create a VM with RDP and WinRM', function (done) {
+      var vmName = suite.generateId(vmPrefix, vmNames);
 
-        // List the VMs
-        suite.execute('vm list --json', function (result) {
-          var vmList = JSON.parse(result.text);
+      // Create a VM using community image (-o option)
+      suite.execute('vm create %s %s communityUser PassW0rd$ -o --json --rdp --winrm --location %s',
+        vmName,
+        communityImageId,
+        process.env.AZURE_VM_TEST_LOCATION || 'West US',
+        verifyCreation(vmName, result)
+      );
+    });
 
-          // Look for created VM
-          var vmExists = vmList.some(function (vm) {
-            return vm.VMName.toLowerCase() === vmName.toLowerCase()
-          });
+    // Verify that the VM was created
+    function verifyCreation(vmName, result) {
+      result.exitStatus.should.equal(0);
 
-          vmExists.should.be.ok;
+      // List the VMs
+      suite.execute('vm list --json', function (result) {
+        var vmList = JSON.parse(result.text);
 
-          // Delete created VM
-          suite.execute('vm delete %s --dns-name %s --json --quiet', vmName, vmName, function (result) {
-            result.exitStatus.should.equal(0);
-            return done();
-          });
+        // Look for created VM
+        var vmExists = vmList.some(function (vm) {
+          return vm.VMName.toLowerCase() === vmName.toLowerCase()
+        });
+
+        vmExists.should.be.ok;
+
+        // Delete created VM
+        suite.execute('vm delete %s --dns-name %s --json --quiet', vmName, vmName, function (result) {
+          result.exitStatus.should.equal(0);
+          return done();
         });
       });
-    });
+    };
 
     // Get name of an image of the given category
     function getImageName(category, callBack) {

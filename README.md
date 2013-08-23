@@ -235,6 +235,8 @@ Create a new virtual machine using the specific image and credentials. An image 
 
 **--rdp [port]** - Enable a Windows VM to be remotely administered via RDP. By default port 3389 is chosen.
 
+**--winrm [port]** - Enable a Windows VM to be remotely administered via WinRM and PowerShell Remoting. By default port 5986 is chosen.
+
 **--community** - Specifies that the image is a community image
 
     azure vm create-from [name] [rolefile]
